@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAC-MAN Retro Arcade 2D</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="arcade-container">
+    <header class="arcade-header">
+      <h1 class="arcade-title">PAC-MAN</h1>
+      <div class="hud">
+        <div class="hud-item">1UP <span id="score-display">00000</span></div>
+        <div class="hud-item">HIGH <span id="high-score-display">00000</span></div>
+        <div class="hud-item">VIES <span id="lives-display"></span></div>
+      </div>
+    </header>
+
+    <div class="canvas-wrapper">
+      <canvas id="game-canvas"></canvas>
+
+      <!-- Écran Overlay pour les menus -->
+      <div id="overlay" class="overlay">
+        <!-- Menu principal -->
+        <div id="menu-screen" class="screen-content active">
+          <h2 class="glow-yellow">PAC-MAN</h2>
+          <p class="subtitle">RETRO ARCADE EDITION</p>
+          <div class="controls-info">
+            <p><strong>Contrôles :</strong></p>
+            <p>Flèches directionnelles ou ZQSD / WASD</p>
+          </div>
+          <button id="start-btn" class="arcade-btn">JOUER</button>
+        </div>
+
+        <!-- Écran Game Over -->
+        <div id="gameover-screen" class="screen-content hidden">
+          <h2 class="glow-red">GAME OVER</h2>
+          <p class="final-score">SCORE FINAL : <span id="gameover-score">0</span></p>
+          <button id="restart-btn" class="arcade-btn">REJOUER</button>
+        </div>
+
+        <!-- Écran Victoire -->
+        <div id="victory-screen" class="screen-content hidden">
+          <h2 class="glow-green">VICTOIRE !</h2>
+          <p class="subtitle">VOUS AVEZ NETTOYÉ LE LABYRINTHE !</p>
+          <p class="final-score">SCORE FINAL : <span id="victory-score">0</span></p>
+          <button id="next-btn" class="arcade-btn">REJOUER</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="arcade-footer">
+      <p>APPUYEZ SUR [JOUER] OU LA TOUCHE [ESPACE] / [ENTRÉE] POUR DÉMARRER</p>
+    </footer>
+  </div>
+
+  <script src="js/board.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/ghosts.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>

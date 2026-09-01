@@ -1,0 +1,19 @@
+{
+  "name": "pacman-retro-arcade",
+  "version": "1.0.0",
+  "description": "Jeu Pac-Man rétro en 2D Canvas avec Node.js natif",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "pacman",
+    "arcade",
+    "canvas",
+    "game",
+    "nodejs",
+    "html5"
+  ],
+  "author": "",
+  "license": "ISC"
+}

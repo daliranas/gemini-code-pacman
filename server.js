@@ -1,9 +1,11 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { getDatabase } = require('./database');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, 'public');
+const db = getDatabase();
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -17,7 +19,42 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  let reqUrl = req.url === '/' ? '/index.html' : req.url;
+  const urlObj = new URL(req.url, `http://${req.headers.host}`);
+  const pathname = urlObj.pathname;
+
+  // API REST: GET /api/scores (Récupérer le Top 10 des scores)
+  if (req.method === 'GET' && pathname === '/api/scores') {
+    const scores = db.getTopScores(10);
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ success: true, scores }));
+    return;
+  }
+
+  // API REST: POST /api/scores (Enregistrer un nouveau score)
+  if (req.method === 'POST' && pathname === '/api/scores') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+      if (body.length > 1e6) req.socket.destroy(); // Protection DoS
+    });
+
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        const { playerName, score, difficulty, mapName } = data;
+        const result = db.addScore(playerName, score, difficulty, mapName);
+        res.writeHead(201, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify(result));
+      } catch (err) {
+        res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: false, error: 'Format JSON invalide' }));
+      }
+    });
+    return;
+  }
+
+  // Fichiers statiques du dossier /public
+  let reqUrl = pathname === '/' ? '/index.html' : pathname;
   let safePath = path.normalize(reqUrl).replace(/^(\.\.[\/\\])+/, '');
   let filePath = path.join(PUBLIC_DIR, safePath);
 

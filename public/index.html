@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PAC-MAN Retro Arcade 2D</title>
+  <title>PAC-MAN Retro Arcade Deluxe</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div class="arcade-container">
     <header class="arcade-header">
-      <h1 class="arcade-title">PAC-MAN</h1>
+      <div class="header-top">
+        <h1 class="arcade-title">PAC-MAN</h1>
+        <div class="top-actions">
+          <button id="leaderboard-toggle-btn" class="arcade-mini-btn" title="Voir le tableau des scores">🏆 SCORES</button>
+          <button id="mute-btn" class="mute-btn" title="Activer / Désactiver le son">🔊 SON</button>
+        </div>
+      </div>
       <div class="hud">
         <div class="hud-item">1UP <span id="score-display">00000</span></div>
         <div class="hud-item">HIGH <span id="high-score-display">00000</span></div>
@@ -20,24 +26,89 @@
     <div class="canvas-wrapper">
       <canvas id="game-canvas"></canvas>
 
-      <!-- Écran Overlay pour les menus -->
+      <!-- Écran Overlay pour les menus, options et scores -->
       <div id="overlay" class="overlay">
         <!-- Menu principal -->
         <div id="menu-screen" class="screen-content active">
           <h2 class="glow-yellow">PAC-MAN</h2>
-          <p class="subtitle">RETRO ARCADE EDITION</p>
-          <div class="controls-info">
-            <p><strong>Contrôles :</strong></p>
-            <p>Flèches directionnelles ou ZQSD / WASD</p>
+          <p class="subtitle">DELUXE ARCADE & SQLITE EDITION</p>
+
+          <div class="player-input-box">
+            <label for="player-name-input">PSEUDO :</label>
+            <input type="text" id="player-name-input" maxlength="6" value="PAC" placeholder="PAC" autocomplete="off">
           </div>
-          <button id="start-btn" class="arcade-btn">JOUER</button>
+
+          <div class="options-container">
+            <!-- Sélecteur de Difficulté -->
+            <div class="option-group">
+              <label class="option-title">DIFFICULTÉ :</label>
+              <div class="btn-group">
+                <button type="button" class="opt-btn opt-diff" data-value="easy">FACILE</button>
+                <button type="button" class="opt-btn opt-diff selected" data-value="normal">NORMAL</button>
+                <button type="button" class="opt-btn opt-diff" data-value="hard">DIFFICILE</button>
+              </div>
+            </div>
+
+            <!-- Sélecteur de Carte -->
+            <div class="option-group">
+              <label class="option-title">CARTE :</label>
+              <div class="btn-group">
+                <button type="button" class="opt-btn opt-map selected" data-value="classic">CLASSIQUE</button>
+                <button type="button" class="opt-btn opt-map" data-value="open">OUVERTE</button>
+                <button type="button" class="opt-btn opt-map" data-value="giant">GÉANTE</button>
+              </div>
+            </div>
+
+            <!-- Sélecteur de Rendu Graphique -->
+            <div class="option-group">
+              <label class="option-title">GRAPHISMES :</label>
+              <div class="btn-group">
+                <button type="button" class="opt-btn opt-gfx selected" data-value="normal">NORMAL</button>
+                <button type="button" class="opt-btn opt-gfx" data-value="hd">HD NÉON</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="menu-actions">
+            <button id="start-btn" class="arcade-btn">JOUER</button>
+            <button id="menu-scores-btn" class="arcade-btn secondary-btn">🏆 TOP SCORES</button>
+          </div>
+        </div>
+
+        <!-- Tableau des Scores (Leaderboard Modal) -->
+        <div id="leaderboard-screen" class="screen-content hidden">
+          <h2 class="glow-yellow">HALL OF FAME</h2>
+          <p class="subtitle">TOP 10 MEILLEURS JOUEURS (SQLITE)</p>
+
+          <div class="leaderboard-table-wrapper">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>JOUEUR</th>
+                  <th>SCORE</th>
+                  <th>DIFF</th>
+                  <th>CARTE</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboard-body">
+                <tr><td colspan="5">Chargement des scores...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <button id="leaderboard-back-btn" class="arcade-btn">RETOUR</button>
         </div>
 
         <!-- Écran Game Over -->
         <div id="gameover-screen" class="screen-content hidden">
           <h2 class="glow-red">GAME OVER</h2>
           <p class="final-score">SCORE FINAL : <span id="gameover-score">0</span></p>
-          <button id="restart-btn" class="arcade-btn">REJOUER</button>
+          <p id="gameover-save-status" class="save-status"></p>
+          <div class="btn-row">
+            <button id="restart-btn" class="arcade-btn">REJOUER</button>
+            <button id="gameover-scores-btn" class="arcade-btn secondary-btn">🏆 SCORES</button>
+          </div>
         </div>
 
         <!-- Écran Victoire -->
@@ -45,16 +116,34 @@
           <h2 class="glow-green">VICTOIRE !</h2>
           <p class="subtitle">VOUS AVEZ NETTOYÉ LE LABYRINTHE !</p>
           <p class="final-score">SCORE FINAL : <span id="victory-score">0</span></p>
-          <button id="next-btn" class="arcade-btn">REJOUER</button>
+          <p id="victory-save-status" class="save-status"></p>
+          <div class="btn-row">
+            <button id="next-btn" class="arcade-btn">REJOUER</button>
+            <button id="victory-scores-btn" class="arcade-btn secondary-btn">🏆 SCORES</button>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- D-Pad virtuel d'appoint pour un contrôle fluide en un clic -->
+    <div class="virtual-dpad">
+      <button type="button" class="dpad-btn dpad-up" data-dir="up">▲</button>
+      <div class="dpad-middle">
+        <button type="button" class="dpad-btn dpad-left" data-dir="left">◀</button>
+        <div class="dpad-center"></div>
+        <button type="button" class="dpad-btn dpad-right" data-dir="right">▶</button>
+      </div>
+      <button type="button" class="dpad-btn dpad-down" data-dir="down">▼</button>
+    </div>
+
     <footer class="arcade-footer">
-      <p>APPUYEZ SUR [JOUER] OU LA TOUCHE [ESPACE] / [ENTRÉE] POUR DÉMARRER</p>
+      <p>CONTRÔLES : [FLÈCHES] / [ZQSD] / [WASD] / [SWIPE] &bull; PAUSE : [P]</p>
     </footer>
   </div>
 
+  <script src="js/audio.js"></script>
+  <script src="js/particles.js"></script>
+  <script src="js/fruits.js"></script>
   <script src="js/board.js"></script>
   <script src="js/player.js"></script>
   <script src="js/ghosts.js"></script>
